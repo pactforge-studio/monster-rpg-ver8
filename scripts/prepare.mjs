@@ -12,5 +12,5 @@ fs.writeFileSync(noticesPath, notices);
 let index = fs.readFileSync(path.join(game, 'index.html'), 'utf8');
 // Old-source updates may include its redirect hook. It is never needed on the new host.
 index = index.replace(/<script src="js\/url-redirect\.js[^\"]*"><\/script>\s*/g, '');
-index = index.replace(/(js\/notices-data\.js\?v=)[^"]+/, '$1pactforge-url-1');
+index = index.replace(/(js\/notices-data\.js\?v=[^"]+)/, '$1-pactforge-url-1');
 fs.writeFileSync(path.join(game, 'index.html'), index);
