@@ -11,7 +11,10 @@
   if (location.origin === OLD) {
     fallback.href = BASE + '?legacy=1'; fallback.hidden = false;
     let payload;
-    try { payload = core.validate(core.snapshot(localStorage)); }
+    try {
+      if (localStorage.getItem(core.marker) === 'complete') { location.replace(NEW + BASE); return; }
+      payload = core.validate(core.snapshot(localStorage));
+    }
     catch (_) { status.textContent = 'セーブを読み取れませんでした。旧画面で続けられます。'; return; }
     if (!core.hasSave(payload)) { location.replace(NEW + BASE); return; }
     let target = null;
@@ -37,6 +40,9 @@
       }
       if (event.data.type === 'monster-transfer-result') {
         const result = event.data.result;
+        if (['imported', 'already', 'existing'].includes(result)) {
+          try { localStorage.setItem(core.marker, 'complete'); } catch (_) { /* A later visit can repeat the safe handoff. */ }
+        }
         status.textContent = result === 'imported' ? 'セーブを引き継ぎました。新しい画面でそのまま遊べます。' : result === 'already' || result === 'existing' ? '新しい画面のセーブを使用します。古いデータで上書きしていません。' : '引き継ぎに失敗しました。旧画面のセーブはそのまま残っています。';
         open.textContent = '新しいゲーム画面を開く';
       }
