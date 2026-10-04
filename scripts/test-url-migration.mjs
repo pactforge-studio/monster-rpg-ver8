@@ -43,6 +43,12 @@ oldSaved.message({origin:NEW,source:{},data:{type:'monster-transfer-ready'}}); a
 oldSaved.message({origin:NEW,source:oldSaved.popup,data:{type:'monster-transfer-ready'}});
 assert.equal(oldSaved.sent[0].target,NEW); assert.equal(oldSaved.sent[0].data.payload.entries.mb_profiles_v1,entries.mb_profiles_v1);
 const blocked = screen(OLD,source,{blocked:true}); assert.equal(blocked.elements.open.hidden,false); assert.match(blocked.elements.status.textContent,/タップ/);
+oldSaved.message({origin:NEW,source:oldSaved.popup,data:{type:'monster-transfer-result',result:'imported'}});
+assert.equal(source.getItem(m.marker),'complete');
+assert.deepEqual(screen(OLD,source,{blocked:true}).redirects,[NEW+BASE]);
+const failedSource = new Store(entries), failedOld = screen(OLD,failedSource);
+failedOld.message({origin:NEW,source:failedOld.popup,data:{type:'monster-transfer-result',result:'failed'}});
+assert.equal(failedSource.getItem(m.marker),null);
 const receiverStore = new Store(), receiver = screen(NEW,receiverStore);
 assert.equal(receiver.sent[0].target,OLD);
 receiver.message({origin:OLD,source:{},data:{type:'monster-transfer-data',payload}}); assert.equal(receiverStore.data.size,0);
