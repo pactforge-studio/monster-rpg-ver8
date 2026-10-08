@@ -92,4 +92,6 @@ jobs:
         working-directory: game
         env:
           GAME_TEST_URL: ${{ steps.deployment.outputs.page_url }}
-        run: node scripts/test-evolution-native-card-migration-browser.mjs
+        run: |
+          node scripts/test-evolution-native-card-migration-browser.mjs
+          node scripts/test-normal-healing-browser.mjs
