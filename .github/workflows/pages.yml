@@ -95,3 +95,20 @@ jobs:
         run: |
           node scripts/test-evolution-native-card-migration-browser.mjs
           node scripts/test-normal-healing-browser.mjs
+      - name: Verify published motion and runtime hashes
+        env:
+          GAME_TEST_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          node deployment/scripts/prepare.mjs game
+          python3 deployment/scripts/verify-three-motions.py
+      - name: Verify published three motion playback with isolated saves
+        working-directory: game
+        env:
+          GAME_TEST_URL: ${{ steps.deployment.outputs.page_url }}
+        run: node scripts/test-three-motion-compression-browser.mjs
+      - name: Upload published motion evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: published-three-motion-evidence
+          path: game/artifacts/three-motion-compression
