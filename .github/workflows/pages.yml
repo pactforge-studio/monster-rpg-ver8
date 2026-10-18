@@ -95,6 +95,7 @@ jobs:
         run: |
           node scripts/test-evolution-native-card-migration-browser.mjs
           node scripts/test-normal-healing-browser.mjs
+          node scripts/test-evolution-battle-item-save-browser.mjs
       - name: Verify published motion and runtime hashes
         env:
           GAME_TEST_URL: ${{ steps.deployment.outputs.page_url }}
