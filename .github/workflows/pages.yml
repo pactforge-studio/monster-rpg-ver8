@@ -45,8 +45,12 @@ jobs:
         run: |
           mkdir site
           cp game/index.html game/url-transfer.html site/
-          cp -R game/js game/css game/images site/
+          cp -R game/js game/css game/images game/english site/
           touch site/.nojekyll
+      - name: Validate assembled runtime links and English files
+        run: |
+          node deployment/scripts/test-runtime-links.mjs
+          node deployment/scripts/check-runtime-links.mjs site
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
@@ -96,7 +100,7 @@ jobs:
           node scripts/test-evolution-native-card-migration-browser.mjs
           node scripts/test-normal-healing-browser.mjs
           node scripts/test-evolution-battle-item-save-browser.mjs
-      - name: Verify published motion and runtime hashes
+      - name: Verify published motion, English page and runtime hashes
         env:
           GAME_TEST_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
