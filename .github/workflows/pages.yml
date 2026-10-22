@@ -52,9 +52,11 @@ jobs:
           mkdir site
           cp game/index.html game/url-transfer.html site/
           cp -R game/js game/css game/images game/english site/
+          node deployment/scripts/prune-unreferenced-motion.mjs site game
           touch site/.nojekyll
       - name: Validate assembled runtime links and English files
         run: |
+          node deployment/scripts/test-prune-unreferenced-motion.mjs
           node deployment/scripts/test-runtime-links.mjs
           node deployment/scripts/check-runtime-links.mjs site
       - uses: actions/upload-pages-artifact@v4
