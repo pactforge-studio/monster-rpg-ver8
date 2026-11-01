@@ -64,6 +64,10 @@ export function checkRuntimeLinks(directory) {
   }
 
   checkFile('index.html');
+  // Older pinned sources do not have Life Quest yet. Once linked, both files are required.
+  if(fs.existsSync(path.join(root,'index.html'))&&fs.readFileSync(path.join(root,'index.html'),'utf8').includes('life-quest/')){
+    checkFile('life-quest/index.html');checkFile('life-quest/rewards.js');
+  }
   for (const file of ['english/index.html', 'english/app.js', 'english/core.js', 'english/style.css']) checkFile(file);
   const curriculumPath = requireTarget('index.html', 'english/curriculum.json');
   if (curriculumPath) {
