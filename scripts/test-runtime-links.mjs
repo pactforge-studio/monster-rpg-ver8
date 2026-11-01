@@ -35,6 +35,15 @@ try {
   fs.renameSync(path.join(temporary, 'english'), path.join(site, 'english'));
   assert.doesNotThrow(() => checkRuntimeLinks(site));
   console.log('PASS: omitting english/ fails; restoring english/ passes');
+  write('index.html',fixture['index.html']+'<a href="life-quest/">Life Quest</a>');
+  assert.throws(()=>checkRuntimeLinks(site),/life-quest/);
+  write('life-quest/index.html','<script src="rewards.js"></script><a href="../">Game</a>');
+  assert.throws(()=>checkRuntimeLinks(site),/rewards.js/);
+  write('life-quest/rewards.js','');
+  assert.doesNotThrow(()=>checkRuntimeLinks(site));
+  write('index.html',fixture['index.html']);
+  console.log('PASS: linked Life Quest requires both its page and bridge');
+
 
   for (const file of Object.keys(fixture)) {
     fs.unlinkSync(path.join(site, file));

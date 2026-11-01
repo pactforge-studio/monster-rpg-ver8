@@ -52,6 +52,7 @@ jobs:
           mkdir site
           cp game/index.html game/url-transfer.html site/
           cp -R game/js game/css game/images game/english site/
+          if [ -d game/life-quest ]; then cp -R game/life-quest site/; fi
           node deployment/scripts/prune-unreferenced-motion.mjs site game
           touch site/.nojekyll
       - name: Validate assembled runtime links and English files
