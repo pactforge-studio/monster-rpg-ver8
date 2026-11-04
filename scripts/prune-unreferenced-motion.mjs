@@ -24,11 +24,27 @@ export function pruneUnreferencedMotion(siteArgument, gameArgument) {
   // registrations cannot disguise a missing or dynamically constructed path.
   const tokens = [...source.matchAll(/\/\*[\s\S]*?\*\/|\/\/[^\r\n]*|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`|[A-Za-z_$][\w$]*|[^\s]/g)]
     .map(match => match[0]).filter(token => !token.startsWith('//') && !token.startsWith('/*'));
-  for (let i = 0; i < tokens.length - 2; i++) {
-    const key = tokens[i].replace(/^(['"])(.*)\1$/, '$2');
-    if (!Object.hasOwn(refs, key) || tokens[i + 1] !== ':') continue;
-    const literal = tokens[i + 2];
-    if (!/^(['"])[^'"\\]+\1$/.test(literal) || ![',', '}'].includes(tokens[i + 3])) {
+  // Other display registries can have static/dynamic posters outside motion/.
+  // Limit the strict literal-path checks to the actual video registry.
+  const declaration = tokens.findIndex((token, i) => token === 'BATTLE_IDLE_MEDIA' &&
+    ['const', 'let', 'var'].includes(tokens[i - 1]) && tokens[i + 1] === '=');
+  if (declaration < 0) throw new Error('BATTLE_IDLE_MEDIA declaration is missing');
+  let start = declaration + 2;
+  const frozen = tokens.slice(start, start + 4).join('') === 'Object.freeze(';
+  if (frozen) start += 4;
+  if (tokens[start] !== '{') throw new Error('Expected a literal BATTLE_IDLE_MEDIA object');
+  let depth = 0, end = -1;
+  for (let i = start; i < tokens.length; i++) {
+    if (tokens[i] === '{') depth++;
+    if (tokens[i] === '}' && --depth === 0) { end = i; break; }
+  }
+  if (end < 0 || (frozen && tokens[end + 1] !== ')')) throw new Error('Incomplete BATTLE_IDLE_MEDIA object');
+  const mediaTokens = tokens.slice(start + 1, end);
+  for (let i = 0; i < mediaTokens.length - 2; i++) {
+    const key = mediaTokens[i].replace(/^(['"])(.*)\1$/, '$2');
+    if (!Object.hasOwn(refs, key) || mediaTokens[i + 1] !== ':') continue;
+    const literal = mediaTokens[i + 2];
+    if (!/^(['"])[^'"\\]+\1$/.test(literal) || ![',', '}'].includes(mediaTokens[i + 3])) {
       throw new Error(`Expected a literal ${key} motion path`);
     }
     refs[key].add(motionPath(literal.slice(1, -1)));

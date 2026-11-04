@@ -72,6 +72,24 @@ try {
   const commented = fixture(49);
   fs.appendFileSync(path.join(commented.game, 'js/battle-idle-media.js'), "\n/* src:'images/monsters/motion/m49.webm',poster:'images/monsters/motion/m49.webp' */");
   failsBeforePruning(commented);
+  // Static cutouts and unrelated display code must not become video references.
+  const staticMedia = fixture();
+  fs.appendFileSync(path.join(staticMedia.game, 'js/battle-idle-media.js'), '\nconst BATTLE_STATIC_MEDIA={elna:{poster:`images/monsters/${id}_fullbody.webp`}};\nfunction otherDisplay(){return {src:dynamicVideo,poster:dynamicPoster};}');
+  for (const base of [staticMedia.game, staticMedia.site]) write(base, 'images/monsters/elna_fullbody.webp', 'transparent cutout');
+  run(staticMedia, true);
+  assert.equal(fs.readFileSync(path.join(staticMedia.site, 'images/monsters/elna_fullbody.webp'), 'utf8'), 'transparent cutout');
+  // Unrelated registrations cannot fill a missing video registration.
+  const outside = fixture(49);
+  fs.appendFileSync(path.join(outside.game, 'js/battle-idle-media.js'), "\nconst OTHER_MEDIA={src:'images/monsters/motion/m49.webm',poster:'images/monsters/motion/m49.webp'};");
+  failsBeforePruning(outside);
+  for (const replacement of ['OTHER_MEDIA', 'BATTLE_IDLE_MEDIA=makeRegistry', 'BATTLE_IDLE_MEDIA=Object.assign']) {
+    const malformed = fixture(), file = path.join(malformed.game, 'js/battle-idle-media.js');
+    fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('BATTLE_IDLE_MEDIA', replacement));
+    failsBeforePruning(malformed);
+  }
+  const truncated = fixture(), truncatedFile = path.join(truncated.game, 'js/battle-idle-media.js');
+  fs.writeFileSync(truncatedFile, fs.readFileSync(truncatedFile, 'utf8').slice(0, -3));
+  failsBeforePruning(truncated);
   const identical = fixture(); run({ game: identical.game, site: identical.game }, false);
   const nested = fixture(); run({ game: nested.game, site: path.join(nested.game, 'images') }, false);
   const directory = fixture(); fs.mkdirSync(path.join(directory.site, prefix, 'unexpected')); failsBeforePruning(directory);
