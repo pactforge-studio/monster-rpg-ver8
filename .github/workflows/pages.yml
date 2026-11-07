@@ -50,8 +50,8 @@ jobs:
       - name: Assemble runtime files
         run: |
           mkdir site
-          cp game/index.html game/url-transfer.html site/
-          cp -R game/js game/css game/images game/english site/
+          cp game/index.html game/url-transfer.html game/sound-manifest.json site/
+          cp -R game/js game/css game/images game/english game/audio site/
           if [ -d game/life-quest ]; then cp -R game/life-quest site/; fi
           node deployment/scripts/prune-unreferenced-motion.mjs site game
           touch site/.nojekyll
@@ -60,6 +60,7 @@ jobs:
           node deployment/scripts/test-prune-unreferenced-motion.mjs
           node deployment/scripts/test-runtime-links.mjs
           node deployment/scripts/check-runtime-links.mjs site
+          node deployment/scripts/verify-sound-assets.mjs game site
       - uses: actions/upload-pages-artifact@v4
         with:
           path: site
@@ -115,6 +116,7 @@ jobs:
         run: |
           node deployment/scripts/prepare.mjs game
           python3 deployment/scripts/verify-three-motions.py
+          node deployment/scripts/verify-sound-assets.mjs game "$GAME_TEST_URL"
       - name: Verify published three motion playback with isolated saves
         working-directory: game
         env:
