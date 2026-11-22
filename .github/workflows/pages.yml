@@ -59,6 +59,7 @@ jobs:
         run: |
           node deployment/scripts/test-prune-unreferenced-motion.mjs
           node deployment/scripts/test-runtime-links.mjs
+          node deployment/scripts/test-verify-sound-assets.mjs
           node deployment/scripts/check-runtime-links.mjs site
           node deployment/scripts/verify-sound-assets.mjs game site
       - uses: actions/upload-pages-artifact@v4
